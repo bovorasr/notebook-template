@@ -1,0 +1,9 @@
+.DS_Store
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/plugins/*/node_modules/
+.obsidian/plugins/*/main.js
+!.obsidian/plugins/notebook-graph/main.js
+.obsidian/plugins/*/styles.css
+__pycache__/
+*.pyc

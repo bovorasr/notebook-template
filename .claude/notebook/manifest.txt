@@ -1,0 +1,44 @@
+# What a notebook takes from the template, and how. Read by setup.py, which
+# copies exactly these, and by upstream.py, which compares them (upstream.md).
+#
+#   generic   taken unchanged, and never edited in a notebook except by the
+#             update skill: any difference from the template is drift
+#   skeleton  renamed and filled in by the notebook, which owns it from then
+#             on: the template's later changes are adapted by hand, never copied
+#   own       the template's own, inside a folder listed above it
+#   choice    one file a notebook holds, from whichever source the setting
+#             named in its source path chooses - `choice <file> <source>
+#             <default>`, the default standing for a notebook that names
+#             none. The other sources never reach it: rules Claude can read
+#             shape what it does, even ones that are not its notebook's
+#
+# The longest matching entry wins; a path ending in / is a folder. Anything
+# not listed, or listed as own, never reaches a notebook.
+
+generic   .claude/notebook/
+choice    .claude/notebook/assistance.md      .claude/notebook/assistance/{ASSISTANCE}.md      scribe
+choice    .claude/notebook/consultation.md    .claude/notebook/consultation/{CONSULTATION}.md  closed
+own       .claude/notebook/assistance/
+own       .claude/notebook/consultation/
+generic   .claude/skills/update/
+generic   .claude/skills/rename/
+generic   .scripts/notebook.py
+generic   .scripts/vault_check.py
+generic   .scripts/audit.py
+generic   .scripts/types_check.py
+generic   .scripts/relink.py
+generic   .scripts/upstream.py
+generic   .scripts/checkout.py
+generic   .obsidian/plugins/notebook-graph/
+generic   Views/Types.base
+
+skeleton  CLAUDE.host.md
+skeleton  Hub.md
+skeleton  Types/entry.md
+skeleton  .claude/skills/
+own       .claude/skills/setup/
+skeleton  .scripts/notebook_config.py
+skeleton  .obsidian/plugins/notebook-graph/data.json
+skeleton  .obsidian/graph.json
+skeleton  .obsidian/community-plugins.json
+skeleton  .gitignore

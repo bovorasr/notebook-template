@@ -1,0 +1,14 @@
+filters:
+  and:
+    - type == "type"
+views:
+  - type: table
+    name: The type system
+    order:
+      - declares
+      - folder
+      - required
+      - optional
+    sort:
+      - property: declares
+        direction: ASC

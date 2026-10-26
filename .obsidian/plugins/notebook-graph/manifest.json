@@ -1,0 +1,9 @@
+{
+  "id": "notebook-graph",
+  "name": "Notebook graph",
+  "version": "0.1.0",
+  "minAppVersion": "1.10.0",
+  "description": "Gives every local graph the global graph's colour groups and filter, which the notebook derives from its type declarations.",
+  "author": "notebook-template",
+  "isDesktopOnly": false
+}

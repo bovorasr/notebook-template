@@ -1,0 +1,16 @@
+{
+  "showTags": true,
+  "showAttachments": true,
+  "hideUnresolved": true,
+  "showOrphans": true,
+  "showArrow": true,
+  "textFadeMultiplier": -0.6,
+  "nodeSizeMultiplier": 2,
+  "lineSizeMultiplier": 1,
+  "centerStrength": 0.33,
+  "repelStrength": 11,
+  "linkStrength": 0.6,
+  "linkDistance": 180,
+  "colorGroups": [],
+  "search": ""
+}
