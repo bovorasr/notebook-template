@@ -21,14 +21,24 @@ Not for anything an outlet can hold - a setting, the notebook's own operation or
 
 ## How
 
-1. **Write it in the template's terms.** Name roles, never this notebook's names (`README.md`, "Name roles, never the host's names"): *a ledger type*, *a generated type*, *the hub*, *a type whose pages are verbatim texts* - not the notebook's types, pages, people or places. No quotes from the notes, and nothing the notebook's law keeps private: every notebook's maintainers read the template's issues, and they see only what the issue says.
+1. **Write it in the template's terms.** Name roles, never this notebook's names (`README.md`, "Name roles, never the host's names"): *a ledger type*, *a generated type*, *the hub*, *a type whose pages are verbatim texts* - not the notebook's types, pages, people or places. Whoever reads the issue sees only what it says, so it must stand on its own.
+
+   **An issue is public: anyone can read it, and it stays readable after an edit.** So it holds no private data of any kind, the domain's or otherwise:
+   - the notebook's names, quotes from its notes, and anything its law keeps private
+   - people's names, usernames and email addresses
+   - paths on someone's machine, hostnames, and links to private repositories or internal systems
+   - credentials, tokens and keys
+   - anything from an employer or a client: project names, internal terms, data
+   - screenshots or pasted output that carry any of the above
+
+   Where a problem can only be shown with real data, say what kind of data it was and reproduce it with placeholders.
 2. **Say what was needed and why**, under these headings:
    - **What happened** - the situation, abstractly: what was being done, what the generic layer did, what was expected instead
    - **Where** - the generic file, and the section or function
    - **Why no outlet fits** - or which outlet is missing
    - **What would fix it** - the change proposed, as it would read in the template
    - **How to see it** - a way to reproduce it in a scratch notebook made with setup, in placeholder names
-3. **Show the user the draft, and open it when they agree** - an issue is published to the template's repository. The repository is the one `TEMPLATE` names in `.scripts/notebook_config.py`:
+3. **Show the user the draft, and open it when they agree.** The draft is exactly what will be published, so **ask them to check it for private data first** - the check that counts is this one, before the issue exists. The repository is the one `TEMPLATE` names in `.scripts/notebook_config.py`:
 
    ```bash
    gh issue create --repo <owner>/<repo> --label <bug|enhancement> --title "<the change, in the template's terms>" --body-file <draft>
@@ -38,4 +48,4 @@ Not for anything an outlet can hold - a setting, the notebook's own operation or
 
 ## On the template's side
 
-An issue from a notebook is read for **domain leakage first**: a name, a quote, anything private. Edit it out of the issue before anything else is done with it. Then the change is made as any other: generically, tested in the template, and the commit names the issue (`Closes #<n>`). The template's own `CLAUDE.md` has the rest.
+An issue from a notebook is read for **domain leakage first**: a name, a quote, anything private. Edit it out of the issue before anything else is done with it. **An edit does not erase it**: the issue's edit history keeps the earlier text, and copies may already exist, which is why the notebook checks before opening. Then the change is made as any other: generically, tested in the template, and the commit names the issue (`Closes #<n>`). The template's own `CLAUDE.md` has the rest.
