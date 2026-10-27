@@ -176,7 +176,7 @@ def new(typ, name, sources=(), aliases=(), sets=(), owner=None):
     if typ not in reg:
         sys.exit(f"undeclared type: {typ} (declared: {', '.join(sorted(t for t in reg if not reg[t]['ledger'])) or 'none yet'}). "
                  f"Declare it first - a page in {cfg.TYPES_DIR}/.")
-    p, title, o = _place(typ, name, owner, reg)
+    p, title, o = _place(typ, name, owner, reg, _given(sets))
     if p.exists():
         sys.exit(f"already exists: {p.relative_to(VAULT)}")
     p.parent.mkdir(parents=True, exist_ok=True)
@@ -261,13 +261,66 @@ def _type_dir(p, folder):
             return a
     return None
 
-def _buckets(d, stem):
-    """The bucket folders a page's name puts it in: one per layer of its type's
-    `buckets:`, in order, stopping at the first layer its name does not match.
-    A bucket is a browsing convenience; the name is the page's whole identity."""
+# A bucket layer written `{<field>:<format>}` is read from a date field, not
+# the name (registry.md, "Buckets"): a small moment-style subset of tokens, as
+# Obsidian's daily notes use, with `[...]` for literal text.
+FIELD_LAYER = re.compile(r"^\{(\w+):(.+)\}$")
+DATE_TOKENS = re.compile(r"\[[^\]]*\]|YYYY|YY|MMMM|MMM|MM|M|DD|D")
+MONTHS = ["January", "February", "March", "April", "May", "June", "July",
+          "August", "September", "October", "November", "December"]
+
+def bucket_layer_error(layer):
+    """Why a `buckets:` layer cannot be read, or None."""
+    m = FIELD_LAYER.match(layer)
+    if m:
+        rest = DATE_TOKENS.sub("", m.group(2))
+        if not DATE_TOKENS.search(m.group(2)) or re.search(r"[A-Za-z]", rest):
+            return (f"{layer!r} is not a date format this reads "
+                    "(YYYY, YY, MMMM, MMM, MM, M, DD, D, and [literal text])")
+        return None
+    try:
+        re.compile(layer)
+    except re.error as e:
+        return f"{layer!r} is not a regex Python can read ({e})"
+    return None
+
+def _date(v):
+    """(year, month, day) from a field's value - an ISO date, or the date part
+    of a datetime - or None."""
+    m = re.match(r"""^["']?(\d{4})-(\d{2})-(\d{2})""", (v or "").strip())
+    if not m or not 1 <= int(m.group(2)) <= 12:
+        return None
+    return int(m.group(1)), int(m.group(2)), int(m.group(3))
+
+def _format_date(fmt, ymd):
+    y, mo, dd = ymd
+    tok = {"YYYY": f"{y:04d}", "YY": f"{y % 100:02d}", "MMMM": MONTHS[mo - 1],
+           "MMM": MONTHS[mo - 1][:3], "MM": f"{mo:02d}", "M": str(mo), "DD": f"{dd:02d}", "D": str(dd)}
+    return DATE_TOKENS.sub(lambda m: m.group(0)[1:-1] if m.group(0).startswith("[") else tok[m.group(0)], fmt)
+
+def fields(p):
+    """A page's frontmatter scalars, raw: field -> the text after its colon."""
+    t = p.read_text(encoding="utf-8", errors="replace")
+    if not t.startswith("---\n"):
+        return {}
+    head = t[4:].split("\n---\n", 1)[0]
+    return {k: v.strip() for k, v in re.findall(r"^([A-Za-z_][\w-]*):[ \t]*(.*)$", head, re.M)}
+
+def _buckets(d, stem, values=None):
+    """The bucket folders a page belongs in: one per layer of its type's
+    `buckets:`, in order, stopping at the first layer that does not apply - a
+    regex its name does not match, or a date field it lacks. A bucket is a
+    browsing convenience; the name is the page's whole identity."""
     out = []
-    for rx in d.get("buckets", []):
-        m = re.search(rx, stem)
+    for layer in d.get("buckets", []):
+        f = FIELD_LAYER.match(layer)
+        if f:
+            ymd = _date((values or {}).get(f.group(1)))
+            if not ymd:
+                break
+            out.append(_filename(_format_date(f.group(2), ymd)))
+            continue
+        m = re.search(layer, stem)
         if not m:
             break
         out.append(_filename(m.group(1) if m.groups() else m.group(0)))
@@ -291,7 +344,7 @@ def _home(p, reg):
     td = _type_dir(p, d["folder"]) if d else None
     if td is None:
         return None
-    base = td.joinpath(*_buckets(d, p.stem))
+    base = td.joinpath(*_buckets(d, p.stem, fields(p)))
     return base / p.parent.name / p.name if _is_own(p, d, td) else base / p.name
 
 def _own_page(entity_dir):
@@ -387,10 +440,17 @@ def _foldered(p, reg):
           file=sys.stderr)
     return dest
 
-def _place(typ, value, owner, reg):
+def _place(typ, value, owner, reg, given=None):
     """(path, title, owner page) for a new page of a type, named by its
-    pattern from the variables in scope where it will live."""
+    pattern from the variables in scope where it will live, and bucketed by
+    its name and the fields it will be written with. A page of that name
+    already somewhere in its type folder is that page, wherever it sits."""
     d = reg[typ]
+    values = {**d["defaults"], **{k: v[0] for k, v in (given or {}).items()}}
+    def found(folder, title):
+        name = f"{_filename(title)}.md"
+        hit = next((q for q in sorted(folder.rglob(name)) if _page_type(q) == typ), None)
+        return hit or folder.joinpath(*_buckets(d, _filename(title), values)) / name
     if d["parents"]:
         if not owner:
             sys.exit(f"a {typ} is owned by a {' or '.join(d['parents'])}: say whose, with --owner")
@@ -404,17 +464,15 @@ def _place(typ, value, owner, reg):
             if (m and m.group(d["identity"]) != value
                     and all(m.group(k) == v for k, v in above.items() if k in m.groupdict() and k != d["identity"])):
                 value = m.group(d["identity"])
-        values = {**above, **({} if d["identity"] == "none" else {d["identity"]: value})}
-        title = _render(d, values)
-        folder = (o.parent / d["folder"]).joinpath(*_buckets(d, _filename(title)))
-        return folder / f"{_filename(title)}.md", title, o
+        ids = {**above, **({} if d["identity"] == "none" else {d["identity"]: value})}
+        title = _render(d, ids)
+        return found(o.parent / d["folder"], title), title, o
     if owner:
         sys.exit(f"a {typ} is top-level: nothing owns it (its declaration has no parents:)")
     if value is None:
         sys.exit(f"a {typ} needs a name")
     title = _render(d, {d["identity"]: value})
-    folder = (VAULT / d["folder"]).joinpath(*_buckets(d, _filename(title)))
-    return folder / f"{_filename(title)}.md", title, None
+    return found(VAULT / d["folder"], title), title, None
 
 def _set_field(p, key, value):
     t = p.read_text(encoding="utf-8")
@@ -433,7 +491,7 @@ def _prune(folder, stop):
 
 def tree():
     """Put every page where its declaration says - in the buckets its name
-    puts it in - then write `parent:` on every owned page from where it is.
+    and fields put it in - then write `parent:` on every owned page from where it is.
     Both are derived, so a declaration changed later is caught up by running
     this again, and a page moved by hand to another owner has its link
     follow. A move changes no name and no word, so every link still lands.
@@ -658,7 +716,7 @@ def _entry(name, typ, sets, owner, status):
     the entry it prepared before."""
     t, d = _ledger(typ)
     reg = registry()
-    p, title, o = _place(t, name, owner, reg)
+    p, title, o = _place(t, name, owner, reg, _given(sets))
     if p.exists():
         return t, p, False
     if status == "open" and d["ledger"] == "periodic" and o is not None:

@@ -48,7 +48,7 @@ The five laws protect **what the entry says** - what was found, what was believe
 | a link updated so it still resolves after a page is renamed, re-typed or promoted - the words as written kept, as the alias | a guess restated as what it later turned out to be |
 | an existing link **repointed** so it lands on the same thing it always meant, when a type is declared or re-shaped and the page it pointed at moves or splits | **any new link on a plain word**, even to the right page - linking "brass" to the material, or "the person in the photo" to whoever they later proved to be, classifies the entry after it closed |
 | repairing what fails to render: invalid frontmatter, a broken embed | rewording, reordering, tidying for style |
-| moving an entry into the bucket its name puts it in, or out of one (`registry.md`, "Buckets") - its name and words unchanged | renaming an entry to suit a new folder |
+| moving an entry into the bucket its name or its fields put it in, or out of one (`registry.md`, "Buckets") - its name and words unchanged | renaming an entry to suit a new folder |
 
 - **The words stay.** Maintenance adds or repairs links and file references around the text; it never changes the text a reader sees.
 - **It is its own commit**, named as maintenance, never folded into an occasion's commit. The occasion's diff then still shows exactly what that occasion wrote, and the maintenance shows as what it was.

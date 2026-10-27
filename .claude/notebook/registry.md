@@ -129,18 +129,21 @@ name: "{date} - <Session> - {name}"
 
 ### Buckets
 
-**A type folder may be split into bucket folders, derived from each page's name** - a ledger by year, or by year and month; numbered sections by their first number - with `buckets:`, one regex per layer:
+**A type folder may be split into bucket folders, derived from each page's name or a date field** - a ledger by year, or by year and month; numbered sections by their first number - with `buckets:`, one layer per level of folders:
 
 ```yaml
 buckets:
-  - '^(\d{4})'          # 2026/
-  - '^\d{4}-(\d{2})'    # 2026/01/
+  - '^(\d{4})'          # 2026/      a regex, matched against the name
+  - '{date:MM MMM}'     # 2026/01 Jan/   a date field, with a format
 ```
 
-- **Each layer is matched against the page's filename**; its first capture group names the folder, or the whole match where it has none. Layers apply in order and stop at the first that does not match, so a name no layer matches stays at the top of its type folder - legal, and the type check lists it.
+- **A regex layer is matched against the page's filename**; its first capture group names the folder, or the whole match where it has none.
+- **A field layer, `{<field>:<format>}`, formats a date field** - an ISO date, or the date part of a datetime - as Obsidian's daily notes do: `YYYY`, `YY`, `MMMM` (January), `MMM` (Jan), `MM` (01), `M`, `DD`, `D`, and `[literal text]`. The type check rejects a format it cannot read, as it does a bad regex.
+- **Layers apply in order and stop at the first that does not apply** - a name its regex does not match, a field missing or not a date - so the page stays where the last layer left it: legal, and the type check lists it. The two kinds mix freely.
+- **Bucket by the name when it already carries the key in an order that sorts; by a field when it does not.** A name whose month is a word sorts its month folders alphabetically, and no regex makes `01 Jan` out of `Jan`. **Never change names to suit folders**: a name is fixed at creation (`ledger.md` law 1), and folders are the convenience.
 - **A bucket is a browsing convenience only. The name is the page's whole identity, and never shortens**: `2026/01/2026-01-01`, not `2026/01/01` - as a node it is the full date, a bare link to it stays unique, and changing the buckets later moves pages rather than renaming them.
-- **New pages go straight to their bucket**, and buckets sit between a type folder and its pages wherever that folder is, an owner's included (`graph.md`, "Ownership").
-- **Add, change or remove `buckets:` at any time, then run `notebook.py tree`**: every page moves to where its name now puts it, an entity that owns pages moving as a unit, and emptied buckets are removed. A move changes no name and no word, so every link still lands - and a closed ledger entry may move (`ledger.md`, "Maintenance is not rewriting").
+- **New pages go straight to their bucket**, placed by the fields they are created with, and buckets sit between a type folder and its pages wherever that folder is, an owner's included (`graph.md`, "Ownership").
+- **Add, change or remove `buckets:` at any time, then run `notebook.py tree`**: every page moves to where its name and fields now put it - so correcting a date moves its page - an entity that owns pages moving as a unit, and emptied buckets are removed. A move changes no name and no word, so every link still lands - and a closed ledger entry may move (`ledger.md`, "Maintenance is not rewriting").
 - **It is the declare skill's, like any change to a declaration**: say what will move and confirm, then edit `buckets:` and run `tree`, and commit the declaration and the moves together - the moves follow from the declaration, and git shows them as pure renames. A page open in Obsidian with unsaved edits can be saved back to its old place, which `tree` warns of when the app is running.
 
 **A ledger's `prepared:` lists the sections a projection writes** into an entry before it opens (`ledger.md`, `projection.md`).

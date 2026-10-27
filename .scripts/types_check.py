@@ -288,11 +288,10 @@ for t, d in sorted(REG.items()):
     for par in d["parents"]:
         if par not in REG:
             decl.append(f"{t}  parents: names {par}, which nothing declares")
-    for rx in d["buckets"]:
-        try:
-            re.compile(rx)
-        except re.error as e:
-            decl.append(f"{t}  buckets: {rx!r} is not a regex Python can read ({e})")
+    for layer in d["buckets"]:
+        err = notebook.bucket_layer_error(layer)
+        if err:
+            decl.append(f"{t}  buckets: {err}")
     for s in d["prepared"]:
         if s not in d["sections"]:
             decl.append(f"{t}  prepared: {s}, which is not one of its sections")
@@ -319,9 +318,10 @@ if narrow:
     for l in narrow:
         print(f"  {l}")
 
-# Buckets (registry.md, "Buckets"): a page sits in the folders its name puts
-# it in. Both are browses - `notebook.py tree` moves pages home, and a name
-# no layer matches is legal, and stays at the top of its type folder.
+# Buckets (registry.md, "Buckets"): a page sits in the folders its name and
+# fields put it in. Both are browses - `notebook.py tree` moves pages home,
+# and a page a layer does not apply to is legal, and stays where the last
+# layer that did left it.
 away, loose = [], []
 for t, v in sorted(in_use.items()):
     d = REG.get(t)
@@ -332,17 +332,17 @@ for t, v in sorted(in_use.items()):
             home = notebook._home(p, REG)
             if home is not None and home != p:
                 away.append(f"{p.relative_to(VAULT)}  belongs in {home.parent.relative_to(VAULT)}/")
-            n = len(notebook._buckets(d, p.stem))
+            n = len(notebook._buckets(d, p.stem, notebook.fields(p)))
             if n < len(d["buckets"]):
-                loose.append(f"{p.relative_to(VAULT)}  matches {n} of {t}'s {len(d['buckets'])} bucket layers")
+                loose.append(f"{p.relative_to(VAULT)}  fits {n} of {t}'s {len(d['buckets'])} bucket layers - a name a regex does not match, or a date field missing")
     except re.error:
         continue                    # reported with the declarations above
 if away:
-    print(f"\npages not in the bucket their name puts them in ({len(away)}) - a browse; run `notebook.py tree`:")
+    print(f"\npages not in the bucket their name or fields put them in ({len(away)}) - a browse; run `notebook.py tree`:")
     for l in away:
         print(f"  {l}")
 if loose:
-    print(f"\nnames a bucket layer does not match ({len(loose)}) - a browse; they stay where the last match left them:")
+    print(f"\npages a bucket layer does not apply to ({len(loose)}) - a browse; they stay where the last layer that did left them:")
     for l in loose:
         print(f"  {l}")
 

@@ -141,7 +141,7 @@ A role is a part a thing plays that cuts across types: a person and an organisat
   <another entity>.md            owns nothing yet: still a plain file
 ```
 
-- **A type folder may be split into bucket folders by name** - by year, say - between it and its pages (`registry.md`, "Buckets"); they are for browsing, and change nothing above.
+- **A type folder may be split into bucket folders by name or by a date field** - by year, say - between it and its pages (`registry.md`, "Buckets"); they are for browsing, and change nothing above.
 - **An entity becomes a folder when its first owned page arrives** (`notebook.py` does it). Its filename does not change, so every link to it still lands.
 - **Moving a page to another owner's folder re-parents it.**
 - **`parent:` is written from the path** by `notebook.py tree` - and by anything that makes an owned page - as an ordinary link, so the graph, backlinks and views see ownership. Nobody edits it; where it disagrees with the path, the path wins and the check says so.
