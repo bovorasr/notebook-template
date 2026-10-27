@@ -26,7 +26,9 @@ This repository is **the notebook template**, not a notebook. It holds no domain
 
 ## Bringing in a change worked out in a notebook
 
-Most changes here start in a notebook. They arrive as **issues on this repository**, opened from a notebook's session (`.claude/notebook/requests.md`), or the user brings them over by hand. **Read an issue for domain leakage first** - a notebook's names, quotes from its notes, anything private - and edit it out of the issue before doing anything else with it. Then make the change generically, test it here, and close the issue from the commit (`Closes #<n>`). The notebook's version is written in its own domain's terms, so **rewrite it generically here; never copy the notebook's file in**. Its specifics may stay only as a case study that says where it came from ("in the notebook this grew from").
+Most changes here start in a notebook. They arrive as **issues on this repository**, opened from a notebook's session (`.claude/notebook/requests.md`), or the user brings them over by hand. **Read an issue for domain leakage first** - a notebook's names, quotes from its notes, anything private - and edit it out of the issue before doing anything else with it. Then make the change generically and test it here. The notebook's version is written in its own domain's terms, so **rewrite it generically here; never copy the notebook's file in**. Its specifics may stay only as a case study that says where it came from ("in the notebook this grew from").
+
+**Every change for an issue is tied to it, and the issue is closed when the change is done.** One commit per issue where it can be, holding only that issue's change. Its message names the issue: `Closes #<n>` on the commit that finishes it, `Refs #<n>` on any before. Push it, so GitHub closes the issue from the commit, then check the issue is closed. Leave a short comment on it saying what changed. An issue left open is work not done; an issue closed by hand, with no commit, has no change to show.
 
 ## Checks
 
